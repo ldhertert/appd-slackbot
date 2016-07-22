@@ -1,0 +1,28 @@
+{
+  "name": "appd-slackbot",
+  "version": "1.0.0",
+  "description": "AppDynamics Slack Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beepboophq/node-slack-bot.git"
+  },
+  "keywords": [
+    "slackbot",
+    "bot",
+    "slack"
+  ],
+  "author": "Luke Hertert",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/beepboophq/node-slack-bot/issues"
+  },
+  "homepage": "https://github.com/beepboophq/node-slack-bot#readme",
+  "dependencies": {
+    "beepboop-botkit": "^1.4.1",
+    "botkit": "~0.2.2"
+  }
+}
