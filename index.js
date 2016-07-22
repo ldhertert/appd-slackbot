@@ -102,15 +102,42 @@ controller.hears(['applications'], 'direct_mention,direct_message,mention', func
    if (!appDynamics) return initAppD(bot, message);
   
    appDynamics.getApplications()
-   .map(function (app) {
-        return app.name;
-    })
-    .then(function (applications) {
-        bot.reply(message, applications.join(', '));
-    })
-    .catch(function() {
-       bot.reply(message, 'Sorry, something went wrong.'); 
-    });
+    .map(function (app) {
+          return app.name;
+      })
+      .then(function (applications) {
+          bot.reply(message, applications.join(', '));
+      })
+      .catch(function() {
+        bot.reply(message, 'Sorry, something went wrong.'); 
+      });
+});
+
+controller.hears([/response time for (.*) in (.*)/i], 'direct_mention,direct_message,mention', function (bot, message) {
+    if (!appDynamics) return initAppD(bot, message);
+
+    appDynamics.getBTsForApplication(message.match[2].replace("?", ""))
+      .then(function (bts) {
+          var matches = bts.filter(function (bt) {
+              return bt.name.match(new RegExp("^" + message.match[1] + "$", "i"));
+          });
+          if (matches.length === 0) {
+              bot.reply('Could not find BT named ' + btName);
+          } if (matches.length === 1) {
+              return matches[0];
+          } else {
+              return matches[0];
+          }
+      })
+      .then(function (bt) {
+          return appd.getMetricsForBT(appName, bt.tierName, bt.name);
+      })
+      .then(function (metrics) {
+          bot.reply('The average response time for ' + message.match[1] + ' is ' + matches[0].responseTime + "ms.");        
+      })
+      .catch(function() {
+        bot.reply(message, 'Sorry, something went wrong.'); 
+      });
 });
 
 /*
