@@ -1,4 +1,5 @@
 var Botkit = require('botkit')
+var AppDynamics = require("./appdynamics.js");
 
 var token = process.env.SLACK_TOKEN
 
@@ -30,6 +31,89 @@ controller.on('bot_channel_join', function (bot, message) {
   bot.reply(message, "I'm here!")
 })
 
+var appDynamics = null;
+
+function initAppD(bot, message) {
+  var askControllerHost = function(response, convo) {
+      convo.ask('What is the host for your controller? (example: something.saas.appdynamics.com)', function(response, convo) {
+        askUsername(response, convo);
+        convo.next();
+      }, { key: 'controllerHost' });
+    }
+    askUsername = function(response, convo) {
+      convo.ask('What is the username for your controller? (example: someuser@customer1)', function(response, convo) {
+        askPassword(response, convo);
+        convo.next();
+      }, { key: 'controllerUsername'});
+    }
+    askPassword = function(response, convo) {
+      convo.ask('What is the password for your controller?', function(response, convo) {
+        convo.next();
+      }, { key: 'controllerPassword' });
+    }
+
+    bot.startConversation(message, function (err, convo) {
+      convo.on('end',function(convo) {
+          if (convo.status=='completed') {
+            var res = convo.extractResponses();
+            var host  = convo.extractResponse('controllerHost');
+            //var root = "http://" + host + "/controller";
+            var root = "http://demo1.appdynamics.com/controller";
+            var username = convo.extractResponse('controllerUsername');
+            var password = convo.extractResponse('controllerPassword');
+            appDynamics = new AppDynamics(root, username, password);      
+            convo.say('All set! Please try the previous command again.');          
+          } else {
+            // something happened that caused the conversation to stop prematurely
+          }
+        });
+        askControllerHost(null, convo);
+    });
+}
+
+
+controller.hears([/status of (.*)/i, /going on with (.*)/i, /whats up with (.*)/i], 'direct_message,direct_mention,mention', function(bot, message) {
+    if (!appDynamics) return initAppD(bot, message);
+
+    appDynamics.getOpenIncidents(message.match[1].replace("?", ""))  
+        .then(function (incidents) {
+            console.log(incidents);
+            bot.reply(message, incidents);
+        }) 
+        .catch(function() {
+            bot.reply(message, 'Sorry, something went wrong.'); 
+        });    
+});
+
+controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_mention,mention', function(bot, message) {
+    if (!appDynamics) return initAppD(bot, message);
+  
+    appDynamics.getOpenIncidents()  
+        .then(function (incidents) {
+            console.log(incidents);
+            bot.reply(message, incidents);
+        }) 
+        .catch(function() {
+            bot.reply(message, 'Sorry, something went wrong.'); 
+        });    
+});
+
+controller.hears(['applications'], 'direct_mention,direct_message,mention', function (bot, message) {
+   if (!appDynamics) return initAppD(bot, message);
+  
+   appDynamics.getApplications()
+   .map(function (app) {
+        return app.name;
+    })
+    .then(function (applications) {
+        bot.reply(message, applications.join(', '));
+    })
+    .catch(function() {
+       bot.reply(message, 'Sorry, something went wrong.'); 
+    });
+});
+
+/*
 controller.hears(['hello', 'hi'], ['direct_mention'], function (bot, message) {
   bot.reply(message, 'Hello.')
 })
@@ -73,4 +157,4 @@ controller.hears(['attachment'], ['direct_message', 'direct_mention'], function 
 
 controller.hears('.*', ['direct_message', 'direct_mention'], function (bot, message) {
   bot.reply(message, 'Sorry <@' + message.user + '>, I don\'t understand. \n')
-})
+})*/
