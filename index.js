@@ -91,14 +91,18 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
     appDynamics.getOpenIncidents2()  
         .then(function (incidents) {
             incidents.forEach(function (incident) {
+              var text = incident.description
+                .replace("<b>", "*")
+                .replace("</b>", "*")
+                .replace("<br>", "\n");
               var attachments = [{
-                fallback: incident.description,
-                pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
-                title: incident.severity + ": " + incident.name + " violation on " + incident.appDynamics,
-                image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
+                fallback: text,
+                //pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
+                title: incident.severity + ": " + incident.name + " violation on " + incident.appName,
+                //image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
                 title_link: incident.deepLinkUrl,
-                text: incident.description,
-                color: '#7CD197'
+                text: text,
+                //color: '#7CD197'
               }];
 
               bot.reply(message, {
