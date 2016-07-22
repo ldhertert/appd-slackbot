@@ -92,13 +92,13 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
         .then(function (incidents) {
             incidents.forEach(function (incident) {
               var text = incident.description
-                .replace("<b>", "*")
-                .replace("</b>", "*")
-                .replace("<br>", "\n");
+                .replace(/<b>/g, "*")
+                .replace(/<\/b>/g, "*")
+                .replace(/<br>/g, "\n");
               var attachments = [{
                 fallback: text,
                 //pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
-                title: incident.severity + ": " + incident.name + " violation on " + incident.appName,
+                title: incident.severity + ": " + incident.name + " violation on " + incident.applicationName,
                 //image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
                 title_link: incident.deepLinkUrl,
                 text: text,
