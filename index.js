@@ -133,7 +133,7 @@ controller.hears([/response time for (.*) in (.*)/i], 'direct_mention,direct_mes
           return appDynamics.getMetricsForBT(message.match[2].replace("?", ""), bt.tierName, bt.name);
       })
       .then(function (metrics) {
-          bot.reply('The average response time for ' + message.match[1] + ' is ' + matches[0].responseTime + "ms.");        
+          bot.reply('The average response time for ' + message.match[1] + ' is ' + metrics.responseTime + "ms.");        
       })
       .catch(function(err) {
         bot.reply(message, 'Sorry, something went wrong.'); 
