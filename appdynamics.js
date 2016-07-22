@@ -60,7 +60,6 @@ module.exports = function AppDynamics(controllerRoot, username, password) {
         return Promise.map(applicationNames, function (applicationName) {
                 return get('applications/' + applicationName + '/problems/healthrule-violations?output=JSON&time-range-type=BEFORE_NOW&duration-in-mins=1')
                     .then(function (body) {
-                        console.log(body);
                         var openIncidents = body.filter(function (rule) {
                             return rule.incidentStatus === 'OPEN';
                         })
@@ -92,9 +91,38 @@ module.exports = function AppDynamics(controllerRoot, username, password) {
                 }  
             });
     }
+
+    function getOpenIncidents2(applicationNames) {
+        if (!applicationNames) {
+            return getApplications()
+                .map(function (app) {
+                    return app.name;
+                })
+                .then(getOpenIncidents2);
+        } else if (typeof applicationNames === 'string') {
+            applicationNames = [ applicationNames ];
+        }
+
+        return Promise.map(applicationNames, function (applicationName) {
+                return get('applications/' + applicationName + '/problems/healthrule-violations?output=JSON&time-range-type=BEFORE_NOW&duration-in-mins=1')
+                    .then(function (body) {
+                        return body.filter(function (rule) {
+                            return rule.incidentStatus === 'OPEN';
+                        }).map(function (i) {
+                          i.applicationName = applicationName;  
+                          return i;
+                        });                        
+                    });
+            }) 
+            .reduce(function(previousValue, result) {
+                return (previousValue || []).concat(result);
+            });                        
+    }
+
     return {
         getApplications: getApplications,
         getOpenIncidents: getOpenIncidents,
+        getOpenIncidents2: getOpenIncidents2,
         getBTsForApplication: getBTsForApplication,
         getMetricsForBT: getMetricsForBT
     };

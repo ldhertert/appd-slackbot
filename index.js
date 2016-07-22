@@ -90,13 +90,38 @@ controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_ment
   
     appDynamics.getOpenIncidents()  
         .then(function (incidents) {
-            console.log(incidents);
             bot.reply(message, incidents);
         }) 
         .catch(function() {
             bot.reply(message, 'Sorry, something went wrong.'); 
         });    
 });
+
+controller.hears(['status2'], 'direct_message,direct_mention,mention', function(bot, message) {
+    if (!appDynamics) return initAppD(bot, message);
+  
+    appDynamics.getOpenIncidents2()  
+        .then(function (incidents) {
+            incidents.forEach(function (incident) {
+              var attachments = [{
+                fallback: incident.description,
+                pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
+                title: incident.severity + ": " + incident.name + " violation on " + incident.appDynamics,
+                image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
+                title_link: incident.deepLinkUrl,
+                text: incident.description,
+                color: '#7CD197'
+              }]
+
+              bot.reply(message, {
+                attachments: attachments
+              });
+        }) 
+        .catch(function() {
+            bot.reply(message, 'Sorry, something went wrong.'); 
+        });    
+});
+
 
 controller.hears(['applications'], 'direct_mention,direct_message,mention', function (bot, message) {
    if (!appDynamics) return initAppD(bot, message);
@@ -130,11 +155,9 @@ controller.hears([/response time for (.*) in (.*)/i], 'direct_mention,direct_mes
           }
       })
       .then(function (bt) {
-          console.log("BT: ", bt);
           return appDynamics.getMetricsForBT(message.match[2].replace("?", ""), bt.tierName, bt.name);
       })
       .then(function (metrics) {
-          console.log("Metrics:", metrics);
           return bot.reply(message, 'The average response time for ' + message.match[1] + ' is ' + metrics.responseTime + "ms.");        
       })
       .catch(function(err) {
