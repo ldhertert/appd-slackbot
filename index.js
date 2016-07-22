@@ -77,39 +77,46 @@ controller.hears([/status of (.*)/i, /going on with (.*)/i, /whats up with (.*)/
 
     appDynamics.getOpenIncidents(message.match[1].replace("?", ""))  
         .then(function (incidents) {
-            console.log(incidents);
-            bot.reply(message, incidents);
+            sendIncidents(bot, message, incidents);
         }) 
         .catch(function() {
             bot.reply(message, 'Sorry, something went wrong.'); 
         });    
 });
 
-controller.hears(['status'], 'direct_message,direct_mention,mention', function(bot, message) {
+function sendIncidents(bot, message, incidents) {
+  if (incidents.length === 0) {
+    return bot.reply(message, 'Everything looks good!');
+  }
+
+  incidents.forEach(function (incident) {
+    var text = incident.description
+      .replace(/<b>/g, "*")
+      .replace(/<\/b>/g, "*")
+      .replace(/<br>/g, "\n");
+    var attachments = [{
+      fallback: text,
+      //pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
+      title: incident.severity + ": " + incident.name + " violation on " + incident.applicationName,
+      //image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
+      title_link: incident.deepLinkUrl,
+      text: text,
+      "mrkdwn_in": ["text"],
+      color: incident.severity === "CRITICAL" ? "#f2dede" : '#fcf8e3'
+    }];
+
+    bot.reply(message, {
+      attachments: attachments
+    });
+  });
+}
+
+controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_mention,mention', function(bot, message) {
     if (!appDynamics) return initAppD(bot, message);
   
     appDynamics.getOpenIncidents()  
         .then(function (incidents) {
-            incidents.forEach(function (incident) {
-              var text = incident.description
-                .replace(/<b>/g, "*")
-                .replace(/<\/b>/g, "*")
-                .replace(/<br>/g, "\n");
-              var attachments = [{
-                fallback: text,
-                //pretext: 'We bring bots to life. :sunglasses: :thumbsup:',
-                title: incident.severity + ": " + incident.name + " violation on " + incident.applicationName,
-                //image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
-                title_link: incident.deepLinkUrl,
-                text: text,
-                "mrkdwn_in": ["text"],
-                color: incident.severity === "CRITICAL" ? "#f2dede" : '#fcf8e3'
-              }];
-
-              bot.reply(message, {
-                attachments: attachments
-              });
-            });
+            sendIncidents(bot, message, incidents);
         }) 
         .catch(function() {
             bot.reply(message, 'Sorry, something went wrong.'); 
