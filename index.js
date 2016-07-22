@@ -85,18 +85,6 @@ controller.hears([/status of (.*)/i, /going on with (.*)/i, /whats up with (.*)/
         });    
 });
 
-controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_mention,mention', function(bot, message) {
-    if (!appDynamics) return initAppD(bot, message);
-  
-    appDynamics.getOpenIncidents()  
-        .then(function (incidents) {
-            bot.reply(message, incidents);
-        }) 
-        .catch(function() {
-            bot.reply(message, 'Sorry, something went wrong.'); 
-        });    
-});
-
 controller.hears(['status2'], 'direct_message,direct_mention,mention', function(bot, message) {
     if (!appDynamics) return initAppD(bot, message);
   
@@ -117,6 +105,19 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
                 attachments: attachments
               });
             });
+        }) 
+        .catch(function() {
+            bot.reply(message, 'Sorry, something went wrong.'); 
+        });    
+});
+
+
+controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_mention,mention', function(bot, message) {
+    if (!appDynamics) return initAppD(bot, message);
+  
+    appDynamics.getOpenIncidents()  
+        .then(function (incidents) {
+            bot.reply(message, incidents);
         }) 
         .catch(function() {
             bot.reply(message, 'Sorry, something went wrong.'); 
