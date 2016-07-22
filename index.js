@@ -111,11 +111,12 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
                 title_link: incident.deepLinkUrl,
                 text: incident.description,
                 color: '#7CD197'
-              }]
+              }];
 
               bot.reply(message, {
                 attachments: attachments
               });
+            });
         }) 
         .catch(function() {
             bot.reply(message, 'Sorry, something went wrong.'); 
