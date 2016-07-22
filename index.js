@@ -85,10 +85,10 @@ controller.hears([/status of (.*)/i, /going on with (.*)/i, /whats up with (.*)/
         });    
 });
 
-controller.hears(['status2'], 'direct_message,direct_mention,mention', function(bot, message) {
+controller.hears(['status'], 'direct_message,direct_mention,mention', function(bot, message) {
     if (!appDynamics) return initAppD(bot, message);
   
-    appDynamics.getOpenIncidents2()  
+    appDynamics.getOpenIncidents()  
         .then(function (incidents) {
             incidents.forEach(function (incident) {
               var text = incident.description
@@ -103,7 +103,7 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
                 title_link: incident.deepLinkUrl,
                 text: text,
                 "mrkdwn_in": ["text"],
-                //color: '#7CD197'
+                color: incident.severity === "CRITICAL" ? "#f2dede" : '#fcf8e3'
               }];
 
               bot.reply(message, {
@@ -116,18 +116,6 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
         });    
 });
 
-
-controller.hears(['status', 'going on', 'whats up'], 'direct_message,direct_mention,mention', function(bot, message) {
-    if (!appDynamics) return initAppD(bot, message);
-  
-    appDynamics.getOpenIncidents()  
-        .then(function (incidents) {
-            bot.reply(message, incidents);
-        }) 
-        .catch(function() {
-            bot.reply(message, 'Sorry, something went wrong.'); 
-        });    
-});
 
 
 controller.hears(['applications'], 'direct_mention,direct_message,mention', function (bot, message) {
