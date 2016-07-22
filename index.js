@@ -130,7 +130,7 @@ controller.hears([/response time for (.*) in (.*)/i], 'direct_mention,direct_mes
           }
       })
       .then(function (bt) {
-          return appDynamics.getMetricsForBT(appName, bt.tierName, bt.name);
+          return appDynamics.getMetricsForBT(message.match[2].replace("?", ""), bt.tierName, bt.name);
       })
       .then(function (metrics) {
           bot.reply('The average response time for ' + message.match[1] + ' is ' + matches[0].responseTime + "ms.");        
