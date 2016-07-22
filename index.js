@@ -102,6 +102,7 @@ controller.hears(['status2'], 'direct_message,direct_mention,mention', function(
                 //image_url: 'https://storage.googleapis.com/beepboophq/_assets/bot-1.22f6fb.png',
                 title_link: incident.deepLinkUrl,
                 text: text,
+                "mrkdwn_in": ["text"],
                 //color: '#7CD197'
               }];
 
