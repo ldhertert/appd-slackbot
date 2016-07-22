@@ -135,8 +135,9 @@ controller.hears([/response time for (.*) in (.*)/i], 'direct_mention,direct_mes
       .then(function (metrics) {
           bot.reply('The average response time for ' + message.match[1] + ' is ' + matches[0].responseTime + "ms.");        
       })
-      .catch(function() {
+      .catch(function(err) {
         bot.reply(message, 'Sorry, something went wrong.'); 
+        console.log('Error', err);
       });
 });
 
